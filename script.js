@@ -41,7 +41,7 @@ buttons.addEventListener('click', e => {
         getSecondOperand(btnTextContent)
 
         if (total && secondOperand) {
-            total = operate(total, secondOperand.join(''), operator)
+            total = operate(firstOperand.join(''), secondOperand.join(''), operator)
         }
 
         operationScreen.push(btnTextContent)
@@ -186,6 +186,7 @@ function setOperationType(name) {
         isFirstSecondOperand = false
         total = total? total : firstOperand.join('')
         operator = name
+        firstOperand = [total]
     }
     if (secondOperand) {
         secondOperand = []
