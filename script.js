@@ -14,13 +14,12 @@ const displayScreen = {
 const buttons = document.querySelector('.buttons')
 
 // initialize variables 
-let total = ''
+let total = null
 let operator = ''
 let operationScreen = []
 let operandArray = []
-let firstOperand = []
-let secondOperand = []
-let isFirstSecondOperand = true
+let firstOperand = ''
+let secondOperand = ''
 createButtons()
 
 buttons.addEventListener('click', e => {
@@ -31,11 +30,16 @@ buttons.addEventListener('click', e => {
 
     if(numbers.includes(btnTextContent)){
         updateOperationFromNumbersButton(btnTextContent)
+        performOperation()
     }
     if(symbols.includes(btnTextContent)){
         updateOperationFromOperatorButton(btnTextContent)
     }
+    if(btnTextContent === 'C'){
+        clearScreen()
+    }
     displayScreen.currentBold.textContent = total
+    
 })
 
 function updateOperationFromNumbersButton(value) {
@@ -59,13 +63,94 @@ function updateOperationFromOperatorButton(value) {
         }else {
             operationScreen = operationScreen.concat(cleanedUpValue)
         }
-        
+        assignOperatorValue(cleanedUpValue)
         displayScreen.currentLight.textContent = operationScreen.join('')
     }
 }
 
 
+function assignOperatorValue(value) {
+    switch (value) {
+        case "-":
+            operator = 'minus'
+            break;
+        case "*":
+            operator = 'multiply'
+            break;
+        case "+":
+            operator = 'add'
+            break;
+        case "/":
+            operator = 'divide'
+            break;
+    
+        default:
+            break;
+    }
+}
 
+function performOperation() {
+    if(operandArray.length === 2){
+        firstOperand = operandArray[operandArray.length-2]
+        secondOperand = operandArray[operandArray.length-1]
+        total = operate(firstOperand, secondOperand,operator)
+    }
+    if(operandArray.length > 2){
+        firstOperand = total
+        secondOperand = operandArray[operandArray.length-1]
+        total = operate(firstOperand, secondOperand,operator)
+    }
+}
+
+function operate(firstNumber, secondNum, operator) {
+    const a = Number(firstNumber)
+    const b = Number(secondNum)
+    switch (operator) {
+        case "minus":
+            return subtract(a, b)
+
+        case "multiply":
+
+            return multiply(a, b)
+
+        case "add":
+            return add(a, b)
+
+        case "divide":
+            return divide(a, b)
+
+        default:
+            break;
+    }
+}
+
+
+function add(a, b) {
+    return a + b
+}
+function divide(a, b) {
+
+    return Math.round(a / b)
+}
+function multiply(a, b) {
+    return a * b
+}
+function subtract(a, b) {
+    return a - b
+}
+
+function clearScreen() {
+    total = ''
+    operator = ''
+    operationScreen = []
+    operandArray = []
+    firstOperand = ''
+    secondOperand = ''
+
+    displayScreen.currentBold.textContent = ''
+    displayScreen.currentLight.textContent = 0
+    displayScreen.historyBold.textContent = ''
+}
 
 
 
@@ -111,41 +196,8 @@ function createButtons() {
 
 
 
-// function add(a, b) {
-//     return a + b
-// }
-// function divide(a, b) {
 
-//     return Math.round(a / b)
-// }
-// function multiply(a, b) {
-//     return a * b
-// }
-// function subtract(a, b) {
-//     return a - b
-// }
 
-// function operate(firstNumber, secondNum, operator) {
-//     const a = Number(firstNumber)
-//     const b = Number(secondNum)
-//     switch (operator) {
-//         case "minus":
-//             return subtract(a, b)
-
-//         case "multiply":
-
-//             return multiply(a, b)
-
-//         case "add":
-//             return add(a, b)
-
-//         case "divide":
-//             return divide(a, b)
-
-//         default:
-//             break;
-//     }
-// }
 
 // function getFirstOperand(num) {
 //     if (!total) {
@@ -174,18 +226,7 @@ function createButtons() {
 // }
 
 
-// function clearScreen() {
-//     total = ''
-//     operator = ''
-//     operationScreen = []
-//     firstOperand = []
-//     secondOperand = []
-//     isFirstSecondOperand = true
 
-//     currentBold.textContent = ''
-//     currentLight.textContent = 0
-//     historyBold.textContent = ''
-// }
 
 // function backspace() {
 //     if (isFirstSecondOperand) {
