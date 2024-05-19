@@ -4,83 +4,69 @@ understand this code. LoL
 */
 
 // display nodes
-const currentBold = document.querySelector('.current > .bold')
-const currentLight = document.querySelector('.current > .light')
-const historyBold = document.querySelector('.history > .bold')
-const historyLight = document.querySelector('.history > .light')
-
+const displayScreen = {
+    currentBold: document.querySelector('.current > .bold'),
+ currentLight: document.querySelector('.current > .light'),
+ historyBold: document.querySelector('.history > .bold'),
+ historyLight: document.querySelector('.history > .light')
+}
 // buttons
 const buttons = document.querySelector('.buttons')
-const displayScreen = {
-    currentBold,
-    currentLight,
-    historyBold,
-    historyLight
-}
+
 // initialize variables 
 let total = ''
 let operator = ''
 let operationScreen = []
+let operandArray = []
 let firstOperand = []
 let secondOperand = []
 let isFirstSecondOperand = true
-
-
-
 createButtons()
+
 buttons.addEventListener('click', e => {
-    const numbers = '1234567890'
-    const operatorSymbols = 'X/+-'
     const button = e.target
+    const numbers = '1234567890'
+    const symbols = 'X/+-'
     const btnTextContent = button.textContent
 
-
-    if (numbers.includes(btnTextContent)) {
-        getFirstOperand(btnTextContent)
-        getSecondOperand(btnTextContent)
-
-        if (total && secondOperand) {
-            total = operate(firstOperand.join(''), secondOperand.join(''), operator)
-        }
-
-        operationScreen.push(btnTextContent)
-        displayScreen.currentLight.textContent = operationScreen.join('')
+    if(numbers.includes(btnTextContent)){
+        updateOperationFromNumbersButton(btnTextContent)
     }
-
-    else if (operatorSymbols.includes(btnTextContent)) {
-
-        switch (btnTextContent) {
-            case "X":
-                setOperationType("multiply")
-                break;
-
-            case "-":
-                setOperationType('minus')
-                break;
-            case "+":
-                setOperationType('add')
-                break;
-            case "/":
-                setOperationType('divide')
-                break;
-
-            default:
-                break;
-        }
-
-        handleMultipleSymbolClick(btnTextContent)
-        displayScreen.currentLight.textContent = operationScreen.join('')
-
-    } else if (btnTextContent === "C") {
-        clearScreen()
-    } else if (btnTextContent === "<") {
-        backspace()
-    }
-    else {
-
+    if(symbols.includes(btnTextContent)){
+        updateOperationFromOperatorButton(btnTextContent)
     }
     displayScreen.currentBold.textContent = total
 })
+
+function updateOperationFromNumbersButton(value) {
+    const cleanedUpValue = value === 'X'? '*': value
+
+    operationScreen = operationScreen.concat(cleanedUpValue)
+    operandArray = operationScreen.join('').split(/\D/).filter(s => s != "")
+
+    displayScreen.currentLight.textContent = operationScreen.join('')
+}
+
+function updateOperationFromOperatorButton(value) {
+    const cleanedUpValue = value === 'X'? '*': value
+    const lastItem = operationScreen[operationScreen.length-1]
+
+    if(operationScreen.length === 0){
+        return
+    }else {
+        if('*+-/'.includes(lastItem)){
+            operationScreen[operationScreen.length-1] = cleanedUpValue
+        }else {
+            operationScreen = operationScreen.concat(cleanedUpValue)
+        }
+        
+        displayScreen.currentLight.textContent = operationScreen.join('')
+    }
+}
+
+
+
+
 
 
 
@@ -121,159 +107,139 @@ function createButtons() {
 
 }
 
-// operation functions
 
-function add(a, b) {
-    return a + b
-}
-function divide(a, b) {
 
-    return Math.round(a / b)
-}
-function multiply(a, b) {
-    return a * b
-}
-function subtract(a, b) {
-    return a - b
-}
 
-function operate(firstNumber, secondNum, operator) {
-    const a = Number(firstNumber)
-    const b = Number(secondNum)
-    switch (operator) {
-        case "minus":
-            return subtract(a, b)
 
-        case "multiply":
+// function add(a, b) {
+//     return a + b
+// }
+// function divide(a, b) {
 
-            return multiply(a, b)
+//     return Math.round(a / b)
+// }
+// function multiply(a, b) {
+//     return a * b
+// }
+// function subtract(a, b) {
+//     return a - b
+// }
 
-        case "add":
-            return add(a, b)
+// function operate(firstNumber, secondNum, operator) {
+//     const a = Number(firstNumber)
+//     const b = Number(secondNum)
+//     switch (operator) {
+//         case "minus":
+//             return subtract(a, b)
 
-        case "divide":
-            return divide(a, b)
+//         case "multiply":
 
-        default:
-            break;
-    }
-}
+//             return multiply(a, b)
 
-function getFirstOperand(num) {
-    if (!total) {
-        firstOperand.push(num)
-    }
-}
+//         case "add":
+//             return add(a, b)
 
-function getSecondOperand(num) {
-    if (!isFirstSecondOperand) {
+//         case "divide":
+//             return divide(a, b)
 
-        secondOperand.push(num)
+//         default:
+//             break;
+//     }
+// }
 
-    }
-}
+// function getFirstOperand(num) {
+//     if (!total) {
+//         firstOperand.push(num)
+//     }
+// }
 
-function setOperationType(name) {
-    if (firstOperand) {
-        isFirstSecondOperand = false
-        total = total ? total : firstOperand.join('')
-        operator = name
-        firstOperand = [total]
-    }
-    if (secondOperand) {
-        secondOperand = []
-    }
-}
+// function getSecondOperand(num) {
+//     if (!isFirstSecondOperand) {
 
-function handleMultipleSymbolClick(sym) {
-    const isAsterik = sym === "X" ? "*" : sym
-    const lastItem = operationScreen[operationScreen.length - 1]
-    switch (lastItem) {
-        case "-":
-            operationScreen[operationScreen.length - 1] = isAsterik
-            break;
-        case "*":
-            operationScreen[operationScreen.length - 1] = isAsterik
-            break;
-        case "+":
-            operationScreen[operationScreen.length - 1] = isAsterik
-            break;
-        case "/":
-            operationScreen[operationScreen.length - 1] = isAsterik
-            break;
+//         secondOperand.push(num)
 
-        default:
-            operationScreen.push(isAsterik)
-            break;
-    }
-}
+//     }
+// }
 
-function clearScreen() {
-    total = ''
-    operator = ''
-    operationScreen = []
-    firstOperand = []
-    secondOperand = []
-    isFirstSecondOperand = true
+// function setOperationType(name) {
+//     if (firstOperand) {
+//         isFirstSecondOperand = false
+//         total = total ? total : firstOperand.join('')
+//         operator = name
+//         firstOperand = [total]
+//     }
+//     if (secondOperand) {
+//         secondOperand = []
+//     }
+// }
 
-    currentBold.textContent = ''
-    currentLight.textContent = 0
-    historyBold.textContent = ''
-}
 
-function backspace() {
-    if (isFirstSecondOperand) {
-        if (!firstOperand) {
-            return
-        } else if (firstOperand.length === 1) {
-            firstOperand = [0]
-            operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
-            displayScreen.currentLight.textContent = 0
-            return
-        }
-        else {
-            firstOperand = [...firstOperand.slice(0, firstOperand.length - 1)]
-            operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
-            displayScreen.currentLight.textContent = operationScreen.join('')
-        }
-    }
-    else if (isFirstSecondOperand === false && secondOperand.length === 0) {
-        let valueArray = operationScreen.join('').split(/\D/).filter(s => s != "")
+// function clearScreen() {
+//     total = ''
+//     operator = ''
+//     operationScreen = []
+//     firstOperand = []
+//     secondOperand = []
+//     isFirstSecondOperand = true
 
-        if (valueArray.length > 1) {
-            firstOperand = [valueArray[valueArray.length - 2]]
-            secondOperand = [valueArray[valueArray.length - 1]]
+//     currentBold.textContent = ''
+//     currentLight.textContent = 0
+//     historyBold.textContent = ''
+// }
 
-            total = operate(firstOperand.join(''), secondOperand.join(''), operator)
-            operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
-            displayScreen.currentLight.textContent = operationScreen.join('')
-        }
-        if (valueArray.length === 1) {
+// function backspace() {
+//     if (isFirstSecondOperand) {
+//         if (!firstOperand) {
+//             return
+//         } else if (firstOperand.length === 1) {
+//             firstOperand = [0]
+//             operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
+//             displayScreen.currentLight.textContent = 0
+//             return
+//         }
+//         else {
+//             firstOperand = [...firstOperand.slice(0, firstOperand.length - 1)]
+//             operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
+//             displayScreen.currentLight.textContent = operationScreen.join('')
+//         }
+//     }
+//     else if (isFirstSecondOperand === false && secondOperand.length === 0) {
+//         let valueArray = operationScreen.join('').split(/\D/).filter(s => s != "")
 
-            total = ''
-            firstOperand = [...valueArray]
-            firstOperand = firstOperand.join('').split('')
-            operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
-            displayScreen.currentLight.textContent = operationScreen.join('')
-            isFirstSecondOperand = true
+//         if (valueArray.length > 1) {
+//             firstOperand = [valueArray[valueArray.length - 2]]
+//             secondOperand = [valueArray[valueArray.length - 1]]
+
+//             total = operate(firstOperand.join(''), secondOperand.join(''), operator)
+//             operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
+//             displayScreen.currentLight.textContent = operationScreen.join('')
+//         }
+//         if (valueArray.length === 1) {
+
+//             total = ''
+//             firstOperand = [...valueArray]
+//             firstOperand = firstOperand.join('').split('')
+//             operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
+//             displayScreen.currentLight.textContent = operationScreen.join('')
+//             isFirstSecondOperand = true
             
-        }
-    }
-    else if (isFirstSecondOperand === false && secondOperand.length > 0) {
-        if (secondOperand.length === 1 && Number(secondOperand[0]) > 9) {
-            secondOperand = secondOperand.join('').split('')
-            secondOperand = [...secondOperand.slice(0, secondOperand.length - 1)]
-        } else {
-            secondOperand = [...secondOperand.slice(0, secondOperand.length - 1)]
-        }
+//         }
+//     }
+//     else if (isFirstSecondOperand === false && secondOperand.length > 0) {
+//         if (secondOperand.length === 1 && Number(secondOperand[0]) > 9) {
+//             secondOperand = secondOperand.join('').split('')
+//             secondOperand = [...secondOperand.slice(0, secondOperand.length - 1)]
+//         } else {
+//             secondOperand = [...secondOperand.slice(0, secondOperand.length - 1)]
+//         }
 
-        total = operate(firstOperand.join(''), secondOperand.join(''), operator)
-        operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
-        displayScreen.currentLight.textContent = operationScreen.join('')
-    }
-    else {
-        return
-    }
+//         total = operate(firstOperand.join(''), secondOperand.join(''), operator)
+//         operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
+//         displayScreen.currentLight.textContent = operationScreen.join('')
+//     }
+//     else {
+//         return
+//     }
 
 
-}
+// }
