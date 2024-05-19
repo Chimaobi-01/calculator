@@ -1,7 +1,7 @@
 /*
 A big sorry to my future self. I doubt if you will 
 understand this code. LoL
-*/ 
+*/
 
 // display nodes
 const currentBold = document.querySelector('.current > .bold')
@@ -17,18 +17,17 @@ const displayScreen = {
     historyBold,
     historyLight
 }
+// initialize variables 
 let total = ''
 let operator = ''
 let operationScreen = []
-
 let firstOperand = []
 let secondOperand = []
 let isFirstSecondOperand = true
 
+
+
 createButtons()
-
-
-
 buttons.addEventListener('click', e => {
     const numbers = '1234567890'
     const operatorSymbols = 'X/+-'
@@ -72,34 +71,27 @@ buttons.addEventListener('click', e => {
         handleMultipleSymbolClick(btnTextContent)
         displayScreen.currentLight.textContent = operationScreen.join('')
 
-    } else {
+    } else if (btnTextContent === "C") {
+        clearScreen()
+    } else if (btnTextContent === "<") {
+        backspace()
+    }
+    else {
 
     }
     displayScreen.currentBold.textContent = total
 })
 
-function handleMultipleSymbolClick(sym) {
-    const isAsterik = sym === "X" ? "*" : sym
-    const lastItem = operationScreen[operationScreen.length - 1]
-    switch (lastItem) {
-        case "-":
-            operationScreen[operationScreen.length - 1] = isAsterik
-            break;
-        case "*":
-            operationScreen[operationScreen.length - 1] = isAsterik
-            break;
-        case "+":
-            operationScreen[operationScreen.length - 1] = isAsterik
-            break;
-        case "/":
-            operationScreen[operationScreen.length - 1] = isAsterik
-            break;
 
-        default:
-            operationScreen.push(isAsterik)
-            break;
-    }
-}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -135,7 +127,8 @@ function add(a, b) {
     return a + b
 }
 function divide(a, b) {
-    return a / b
+
+    return Math.round(a / b)
 }
 function multiply(a, b) {
     return a * b
@@ -147,7 +140,6 @@ function subtract(a, b) {
 function operate(firstNumber, secondNum, operator) {
     const a = Number(firstNumber)
     const b = Number(secondNum)
-    console.log(a, b);
     switch (operator) {
         case "minus":
             return subtract(a, b)
@@ -184,11 +176,104 @@ function getSecondOperand(num) {
 function setOperationType(name) {
     if (firstOperand) {
         isFirstSecondOperand = false
-        total = total? total : firstOperand.join('')
+        total = total ? total : firstOperand.join('')
         operator = name
         firstOperand = [total]
     }
     if (secondOperand) {
         secondOperand = []
     }
+}
+
+function handleMultipleSymbolClick(sym) {
+    const isAsterik = sym === "X" ? "*" : sym
+    const lastItem = operationScreen[operationScreen.length - 1]
+    switch (lastItem) {
+        case "-":
+            operationScreen[operationScreen.length - 1] = isAsterik
+            break;
+        case "*":
+            operationScreen[operationScreen.length - 1] = isAsterik
+            break;
+        case "+":
+            operationScreen[operationScreen.length - 1] = isAsterik
+            break;
+        case "/":
+            operationScreen[operationScreen.length - 1] = isAsterik
+            break;
+
+        default:
+            operationScreen.push(isAsterik)
+            break;
+    }
+}
+
+function clearScreen() {
+    total = ''
+    operator = ''
+    operationScreen = []
+    firstOperand = []
+    secondOperand = []
+    isFirstSecondOperand = true
+
+    currentBold.textContent = ''
+    currentLight.textContent = 0
+    historyBold.textContent = ''
+}
+
+function backspace() {
+    if (isFirstSecondOperand) {
+        if (!firstOperand) {
+            return
+        } else if (firstOperand.length === 1) {
+            firstOperand = [0]
+            operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
+            displayScreen.currentLight.textContent = 0
+            return
+        }
+        else {
+            firstOperand = [...firstOperand.slice(0, firstOperand.length - 1)]
+            operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
+            displayScreen.currentLight.textContent = operationScreen.join('')
+        }
+    }
+    else if (isFirstSecondOperand === false && secondOperand.length === 0) {
+        let valueArray = operationScreen.join('').split(/\D/).filter(s => s != "")
+
+        if (valueArray.length > 1) {
+            firstOperand = [valueArray[valueArray.length - 2]]
+            secondOperand = [valueArray[valueArray.length - 1]]
+
+            total = operate(firstOperand.join(''), secondOperand.join(''), operator)
+            operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
+            displayScreen.currentLight.textContent = operationScreen.join('')
+        }
+        if (valueArray.length === 1) {
+
+            total = ''
+            firstOperand = [...valueArray]
+            firstOperand = firstOperand.join('').split('')
+            operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
+            displayScreen.currentLight.textContent = operationScreen.join('')
+            isFirstSecondOperand = true
+            
+        }
+    }
+    else if (isFirstSecondOperand === false && secondOperand.length > 0) {
+        if (secondOperand.length === 1 && Number(secondOperand[0]) > 9) {
+            secondOperand = secondOperand.join('').split('')
+            secondOperand = [...secondOperand.slice(0, secondOperand.length - 1)]
+        } else {
+            secondOperand = [...secondOperand.slice(0, secondOperand.length - 1)]
+        }
+
+        total = operate(firstOperand.join(''), secondOperand.join(''), operator)
+        operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
+        displayScreen.currentLight.textContent = operationScreen.join('')
+    }
+    else {
+        return
+    }
+
+
 }

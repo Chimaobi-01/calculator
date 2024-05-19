@@ -99,6 +99,10 @@ body {
     color: gray;
 }
 
+#C {
+color: red;
+}
+
 
 
 @media screen and (max-width:425px) {
