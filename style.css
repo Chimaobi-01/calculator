@@ -39,27 +39,22 @@ body {
     background: #000000c9;
     color: white;
     padding: 20px 24px 15px;
-    gap: 28px;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
     align-items: end;
+    justify-content: end;
 }
 
-.history span:last-of-type,
 .current span:last-of-type {
     color: gray;
     font-size: 1em;
     font-weight: 600;
 }
-.history span:first-of-type,
 .current span:first-of-type {
     color: white;
-    font-size: 10vw;
+    font-size: 1.5em;
     font-weight: 400;
 }
 
-.history,
 .current {
     display: flex;
     flex-direction: column;

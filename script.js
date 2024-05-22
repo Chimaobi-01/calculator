@@ -6,100 +6,127 @@ understand this code. LoL
 // display nodes
 const displayScreen = {
     currentBold: document.querySelector('.current > .bold'),
- currentLight: document.querySelector('.current > .light'),
- historyBold: document.querySelector('.history > .bold'),
- historyLight: document.querySelector('.history > .light')
+    currentLight: document.querySelector('.current > .light'),
+    historyBold: document.querySelector('.history > .bold'),
+    historyLight: document.querySelector('.history > .light')
 }
 // buttons
 const buttons = document.querySelector('.buttons')
+createButtons()
 
 // initialize variables 
 let total = null
-let operator = ''
-let operationScreen = []
-let operandArray = []
-let firstOperand = ''
-let secondOperand = ''
-createButtons()
+let result = null
+let expression = []
+let input
+let negative
 
+// event listener
 buttons.addEventListener('click', e => {
     const button = e.target
     const numbers = '1234567890'
     const symbols = 'X/+-'
     const btnTextContent = button.textContent
 
-    if(numbers.includes(btnTextContent)){
-        updateOperationFromNumbersButton(btnTextContent)
-        performOperation()
+    if (numbers.includes(btnTextContent)) {
+        updateExpressionFromNumber(btnTextContent)
+        evaluateExpression()
     }
-    if(symbols.includes(btnTextContent)){
-        updateOperationFromOperatorButton(btnTextContent)
+    if (symbols.includes(btnTextContent)) {
+        updateExpressionFromOperator(btnTextContent)
     }
-    if(btnTextContent === 'C'){
+    if (btnTextContent === 'C') {
         clearScreen()
     }
-    displayScreen.currentBold.textContent = total
-    
+    if (btnTextContent === '=') {
+        equateOperation()
+    }
+    displayScreen.currentBold.textContent = result
+
 })
 
-function updateOperationFromNumbersButton(value) {
-    const cleanedUpValue = value === 'X'? '*': value
 
-    operationScreen = operationScreen.concat(cleanedUpValue)
-    operandArray = operationScreen.join('').split(/\D/).filter(s => s != "")
 
-    displayScreen.currentLight.textContent = operationScreen.join('')
-}
 
-function updateOperationFromOperatorButton(value) {
-    const cleanedUpValue = value === 'X'? '*': value
-    const lastItem = operationScreen[operationScreen.length-1]
 
-    if(operationScreen.length === 0){
+
+
+
+
+function updateExpressionFromOperator(value) {
+    const cleanedUpValue = value === 'X' ? '*' : value
+    const lastItem = expression[expression.length - 1]
+
+    if (expression.length === 0) {
         return
-    }else {
-        if('*+-/'.includes(lastItem)){
-            operationScreen[operationScreen.length-1] = cleanedUpValue
-        }else {
-            operationScreen = operationScreen.concat(cleanedUpValue)
+    } else {
+        if ('*+-/'.includes(lastItem)) {
+            expression[expression.length - 1] = cleanedUpValue
+        } else {
+            expression = expression.concat(cleanedUpValue)
         }
-        assignOperatorValue(cleanedUpValue)
-        displayScreen.currentLight.textContent = operationScreen.join('')
+
+        displayScreen.currentLight.textContent = expression.join('')
     }
 }
-
-
-function assignOperatorValue(value) {
-    switch (value) {
-        case "-":
-            operator = 'minus'
-            break;
-        case "*":
-            operator = 'multiply'
-            break;
-        case "+":
-            operator = 'add'
-            break;
-        case "/":
-            operator = 'divide'
-            break;
-    
-        default:
-            break;
-    }
+function updateExpressionFromNumber(value) {
+    expression = expression.concat(value)
+    displayScreen.currentLight.textContent = expression.join('')
 }
 
-function performOperation() {
-    if(operandArray.length === 2){
-        firstOperand = operandArray[operandArray.length-2]
-        secondOperand = operandArray[operandArray.length-1]
-        total = operate(firstOperand, secondOperand,operator)
+function evaluateExpression() {
+    let regexRule = /([0-9]*\.?[0-9]*)([*/])([0-9]*\.?[0-9]*)/
+    let match
+    input = expression.join('')
+
+    while (regexRule.test(input)) {
+        match = regexRule.exec(input)
+
+        if (!match[2])
+            break
+        if (match[2] === "*") {
+            result = operate(match[1], match[3], 'multiply')
+        } else {
+            result = operate(match[1], match[3], 'divide')
+        }
+        input = input.replace(match[0], input)
     }
-    if(operandArray.length > 2){
-        firstOperand = total
-        secondOperand = operandArray[operandArray.length-1]
-        total = operate(firstOperand, secondOperand,operator)
+
+    regexRule = /([0-9]*\.?[0-9]*)([\+\-])([0-9]*\.?[0-9]*)/
+
+    while (regexRule.test(input) && input[0] != '-') {
+        match = regexRule.exec(input)
+
+        if (!match[2])
+            break
+        if (match[2] === "+") {
+            result = operate(match[1], match[3], 'add')
+        } else {
+            result = operate(match[1], match[3], 'minus')
+        }
+        input = input.replace(match[0], `${result}`)
     }
+
+    // Negative numbers
+
+    regexRule = /^-([0-9]*\.?[0-9]*)([\+\-])([0-9]*\.?[0-9]*)/
+    negative = regexRule.test(input)
+
+    while (negative) {
+        match = regexRule.exec(input)
+
+        if (!match[2])
+            break
+        if (match[2] === "+") {
+            result = operate(match[1], match[3], 'add')
+        } else {
+            result = operate(match[1], match[3], 'minus')
+        }
+        input = input.replace(match[0], `${result}`)
+        negative = regexRule.test(input)
+    }
+
+    total = input
 }
 
 function operate(firstNumber, secondNum, operator) {
@@ -124,13 +151,12 @@ function operate(firstNumber, secondNum, operator) {
     }
 }
 
-
 function add(a, b) {
     return a + b
 }
 function divide(a, b) {
-
-    return Math.round(a / b)
+    const temp = a / b
+    return temp.toFixed(1)
 }
 function multiply(a, b) {
     return a * b
@@ -140,35 +166,15 @@ function subtract(a, b) {
 }
 
 function clearScreen() {
-    total = ''
-    operator = ''
-    operationScreen = []
-    operandArray = []
-    firstOperand = ''
-    secondOperand = ''
+    total = null
+    result = null
+    expression = []
+    input
 
     displayScreen.currentBold.textContent = ''
     displayScreen.currentLight.textContent = 0
     displayScreen.historyBold.textContent = ''
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function createButtons() {
     const textContents = [
@@ -192,95 +198,12 @@ function createButtons() {
 
 }
 
+function equateOperation() {
+    if (!expression || !result || !input)
+        return
+    let temp = new String(result)
+    expression = temp.split('')
+    displayScreen.currentLight.textContent = expression.join('')
+    result = null
 
-
-
-
-
-
-
-// function getFirstOperand(num) {
-//     if (!total) {
-//         firstOperand.push(num)
-//     }
-// }
-
-// function getSecondOperand(num) {
-//     if (!isFirstSecondOperand) {
-
-//         secondOperand.push(num)
-
-//     }
-// }
-
-// function setOperationType(name) {
-//     if (firstOperand) {
-//         isFirstSecondOperand = false
-//         total = total ? total : firstOperand.join('')
-//         operator = name
-//         firstOperand = [total]
-//     }
-//     if (secondOperand) {
-//         secondOperand = []
-//     }
-// }
-
-
-
-
-// function backspace() {
-//     if (isFirstSecondOperand) {
-//         if (!firstOperand) {
-//             return
-//         } else if (firstOperand.length === 1) {
-//             firstOperand = [0]
-//             operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
-//             displayScreen.currentLight.textContent = 0
-//             return
-//         }
-//         else {
-//             firstOperand = [...firstOperand.slice(0, firstOperand.length - 1)]
-//             operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
-//             displayScreen.currentLight.textContent = operationScreen.join('')
-//         }
-//     }
-//     else if (isFirstSecondOperand === false && secondOperand.length === 0) {
-//         let valueArray = operationScreen.join('').split(/\D/).filter(s => s != "")
-
-//         if (valueArray.length > 1) {
-//             firstOperand = [valueArray[valueArray.length - 2]]
-//             secondOperand = [valueArray[valueArray.length - 1]]
-
-//             total = operate(firstOperand.join(''), secondOperand.join(''), operator)
-//             operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
-//             displayScreen.currentLight.textContent = operationScreen.join('')
-//         }
-//         if (valueArray.length === 1) {
-
-//             total = ''
-//             firstOperand = [...valueArray]
-//             firstOperand = firstOperand.join('').split('')
-//             operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
-//             displayScreen.currentLight.textContent = operationScreen.join('')
-//             isFirstSecondOperand = true
-            
-//         }
-//     }
-//     else if (isFirstSecondOperand === false && secondOperand.length > 0) {
-//         if (secondOperand.length === 1 && Number(secondOperand[0]) > 9) {
-//             secondOperand = secondOperand.join('').split('')
-//             secondOperand = [...secondOperand.slice(0, secondOperand.length - 1)]
-//         } else {
-//             secondOperand = [...secondOperand.slice(0, secondOperand.length - 1)]
-//         }
-
-//         total = operate(firstOperand.join(''), secondOperand.join(''), operator)
-//         operationScreen = [...operationScreen.slice(0, operationScreen.length - 1)]
-//         displayScreen.currentLight.textContent = operationScreen.join('')
-//     }
-//     else {
-//         return
-//     }
-
-
-// }
+}
